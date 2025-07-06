@@ -6,6 +6,7 @@ on:
       - main
     paths: # Only run if webhook handler code changes
       - 'cloud_functions/strava_webhook_handler/**'
+      - '.github/workflows/deploy-strava-webhook-handler.yaml'
 
 jobs:
   deploy:
