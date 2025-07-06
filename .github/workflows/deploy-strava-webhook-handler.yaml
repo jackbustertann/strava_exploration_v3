@@ -57,7 +57,6 @@ jobs:
             --service-account 12179377055-compute@developer.gserviceaccount.com \
             --no-allow-unauthenticated \
             --ingress all \
-            --entry-point strava_webhook_handler \
             --memory 128Mi \
             --timeout 60s \
             --update-secrets \
