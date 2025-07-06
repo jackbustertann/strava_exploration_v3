@@ -15,5 +15,4 @@ COPY main.py .
 
 # Command to run the Cloud Function using functions-framework.
 # --target strava_webhook_handler specifies the function to execute from main.py.
-# --port $PORT tells functions-framework to listen on the port provided by Cloud Run.
-CMD ["functions-framework", "--target", "strava_webhook_handler", "--port", "$PORT"]
+CMD ["functions-framework", "--target", "strava_webhook_handler"]
