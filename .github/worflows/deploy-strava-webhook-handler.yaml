@@ -1,0 +1,77 @@
+name: Deploy Strava Webhook Handler
+
+on:
+  push:
+    branches:
+      - main
+    paths: # Only run if webhook handler code changes
+      - 'cloud_functions/strava_webhook_handler/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: 'strava-exploration-v2'
+
+      - name: 'Configure Docker for Artifact Registry'
+        run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
+        env:
+          GCP_REGION: us-central1
+
+      - name: 'Build and Push Docker Image'
+        shell: bash
+        run: |
+          # Use the commit SHA as the image tag for unique, traceable builds
+          IMAGE_TAG="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPO }}/strava-webhook-handler:${{ github.sha }}"
+          echo "Building Docker image with tag: $IMAGE_TAG"
+
+          # Build the Docker image from the specified directory and Dockerfile
+          docker build ./cloud_functions/strava_webhook_handler \
+            --file ./cloud_functions/strava_webhook_handler/Dockerfile \
+            --tag "$IMAGE_TAG"
+          docker push "$IMAGE_TAG"
+        env:
+          GCP_REGION: europe-west2
+          GCP_PROJECT_ID: strava-exploration-v2
+          GCP_ARTIFACT_REGISTRY_REPO: strava-webhook-handler
+          GCP_IMAGE_NAME: strava-webhook-handler
+
+      - name: 'Deploy Cloud Function'
+        run: |
+          DEPLOY_IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPO }}/strava-webhook-handler:${{ github.sha }}"
+          
+          gcloud run deploy strava-webhook-handler \
+            --image "$DEPLOY_IMAGE" \
+            --region ${{ vars.GCP_REGION }} \
+            --platform managed \
+            --project ${{ vars.GCP_PROJECT_ID }} \
+            --service-account 12179377055-compute@developer.gserviceaccount.com \
+            --no-allow-unauthenticated \
+            --ingress all \
+            --entry-point strava_webhook_handler \
+            --memory 128Mi \
+            --timeout 60s \
+            --update-secrets \
+              STRAVA_API__CLIENT_SECRET=STRAVA_API__CLIENT_SECRET:latest,\
+              STRAVA_API__VERIFY_TOKEN=STRAVA_API__VERIFY_TOKEN:latest,\
+              STRAVA_API__SUBSCRIPTION_ID=STRAVA_API__SUBSCRIPTION_ID:latest
+        env:
+          GCP_REGION: europe-west2
+          GCP_PROJECT_ID: strava-exploration-v2
+          GCP_ARTIFACT_REGISTRY_REPO: strava-webhook-handler
+          GCP_IMAGE_NAME: strava-webhook-handler
