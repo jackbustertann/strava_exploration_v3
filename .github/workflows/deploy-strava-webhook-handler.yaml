@@ -30,15 +30,13 @@ jobs:
           project_id: 'strava-exploration-v2'
 
       - name: 'Configure Docker for Artifact Registry'
-        run: gcloud auth configure-docker {GCP_REGION}-docker.pkg.dev
-        env:
-          GCP_REGION: us-central1
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
       - name: 'Build and Push Docker Image'
         shell: bash
         run: |
           # Use the commit SHA as the image tag for unique, traceable builds
-          IMAGE_TAG="{GCP_REGION}-docker.pkg.dev/{GCP_PROJECT_ID}/{GCP_ARTIFACT_REGISTRY_REPO}/strava-webhook-handler:${{ github.sha }}"
+          IMAGE_TAG="us-central1-docker.pkg.dev/strava-exploration-v2/strava-webhook-handler/strava-webhook-handler:${{ github.sha }}"
           echo "Building Docker image with tag: $IMAGE_TAG"
 
           # Build the Docker image from the specified directory and Dockerfile
@@ -46,21 +44,16 @@ jobs:
             --file ./cloud_functions/strava_webhook_handler/Dockerfile \
             --tag "$IMAGE_TAG"
           docker push "$IMAGE_TAG"
-        env:
-          GCP_REGION: europe-west2
-          GCP_PROJECT_ID: strava-exploration-v2
-          GCP_ARTIFACT_REGISTRY_REPO: strava-webhook-handler
-          GCP_IMAGE_NAME: strava-webhook-handler
 
       - name: 'Deploy Cloud Function'
         run: |
-          DEPLOY_IMAGE="{GCP_REGION}-docker.pkg.dev/{GCP_PROJECT_ID}/{GCP_ARTIFACT_REGISTRY_REPO}/strava-webhook-handler:${{ github.sha }}"
+          DEPLOY_IMAGE="us-central1-docker.pkg.dev/strava-exploration-v2/strava-webhook-handler/strava-webhook-handler:${{ github.sha }}"
           
           gcloud run deploy strava-webhook-handler \
             --image "$DEPLOY_IMAGE" \
-            --region {GCP_REGION} \
+            --region us-central1 \
             --platform managed \
-            --project {GCP_PROJECT_ID} \
+            --project strava-exploration-v2 \
             --service-account 12179377055-compute@developer.gserviceaccount.com \
             --no-allow-unauthenticated \
             --ingress all \
@@ -71,8 +64,3 @@ jobs:
               STRAVA_API__CLIENT_SECRET=STRAVA_API__CLIENT_SECRET:latest,\
               STRAVA_API__VERIFY_TOKEN=STRAVA_API__VERIFY_TOKEN:latest,\
               STRAVA_API__SUBSCRIPTION_ID=STRAVA_API__SUBSCRIPTION_ID:latest
-        env:
-          GCP_REGION: europe-west2
-          GCP_PROJECT_ID: strava-exploration-v2
-          GCP_ARTIFACT_REGISTRY_REPO: strava-webhook-handler
-          GCP_IMAGE_NAME: strava-webhook-handler
