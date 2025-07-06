@@ -30,7 +30,7 @@ jobs:
           project_id: 'strava-exploration-v2'
 
       - name: 'Configure Docker for Artifact Registry'
-        run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev
+        run: gcloud auth configure-docker {GCP_REGION}-docker.pkg.dev
         env:
           GCP_REGION: us-central1
 
@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           # Use the commit SHA as the image tag for unique, traceable builds
-          IMAGE_TAG="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPO }}/strava-webhook-handler:${{ github.sha }}"
+          IMAGE_TAG="{GCP_REGION}-docker.pkg.dev/{GCP_PROJECT_ID}/{GCP_ARTIFACT_REGISTRY_REPO}/strava-webhook-handler:${{ github.sha }}"
           echo "Building Docker image with tag: $IMAGE_TAG"
 
           # Build the Docker image from the specified directory and Dockerfile
@@ -54,13 +54,13 @@ jobs:
 
       - name: 'Deploy Cloud Function'
         run: |
-          DEPLOY_IMAGE="${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPO }}/strava-webhook-handler:${{ github.sha }}"
+          DEPLOY_IMAGE="{GCP_REGION}-docker.pkg.dev/{GCP_PROJECT_ID}/{GCP_ARTIFACT_REGISTRY_REPO}/strava-webhook-handler:${{ github.sha }}"
           
           gcloud run deploy strava-webhook-handler \
             --image "$DEPLOY_IMAGE" \
-            --region ${{ vars.GCP_REGION }} \
+            --region {GCP_REGION} \
             --platform managed \
-            --project ${{ vars.GCP_PROJECT_ID }} \
+            --project {GCP_PROJECT_ID} \
             --service-account 12179377055-compute@developer.gserviceaccount.com \
             --no-allow-unauthenticated \
             --ingress all \
