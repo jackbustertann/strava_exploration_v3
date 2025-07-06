@@ -1,0 +1,8 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.env # For local environment variables
+venv/ # For Python virtual environment
+.idea/ # For PyCharm/IntelliJ
+.vscode/ # For VS Code
+*.log
