@@ -59,7 +59,4 @@ jobs:
             --ingress all \
             --memory 128Mi \
             --timeout 60s \
-            --update-secrets \
-              STRAVA_API__CLIENT_SECRET=STRAVA_API__CLIENT_SECRET:latest,\
-              STRAVA_API__VERIFY_TOKEN=STRAVA_API__VERIFY_TOKEN:latest,\
-              STRAVA_API__SUBSCRIPTION_ID=STRAVA_API__SUBSCRIPTION_ID:latest
+            --update-secrets "STRAVA_API__VERIFY_TOKEN=STRAVA_API__VERIFY_TOKEN:latest,STRAVA_API__CLIENT_SECRET=STRAVA_API__CLIENT_SECRET:latest,STRAVA_API__SUBSCRIPTION_ID=STRAVA_API__SUBSCRIPTION_ID:latest"
