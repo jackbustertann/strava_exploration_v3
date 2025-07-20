@@ -1,9 +1,6 @@
 FROM python:3.11-slim
 
-# Set environment variables for non-buffered output (important for Cloud Run logs)
-ENV PYTHONUNBUFFERED=1 \
-    # Set the working directory inside the container
-    APP_HOME=/app
+ENV APP_HOME=/app
 
 WORKDIR $APP_HOME
 

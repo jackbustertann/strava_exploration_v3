@@ -4,3 +4,4 @@ python_version = "3.11"
 [packages]
 python-decouple = "*"
 functions-framework = "*"
+google-cloud-pubsub = "*"
