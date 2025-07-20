@@ -54,10 +54,10 @@ jobs:
             --region us-central1 \
             --platform managed \
             --project strava-exploration-v2 \
-            --service-account 12179377055-compute@developer.gserviceaccount.com \
+            --service-account strava-webhook-handler@strava-exploration-v2.iam.gserviceaccount.com \
             --no-allow-unauthenticated \
             --ingress all \
-            --memory 128Mi \
+            --memory 256Mi \
             --timeout 60s \
             --clear-env-vars \
             --update-secrets "STRAVA_API__VERIFY_TOKEN=STRAVA_API__VERIFY_TOKEN:latest,STRAVA_API__CLIENT_SECRET=STRAVA_API__CLIENT_SECRET:latest,STRAVA_API__SUBSCRIPTION_ID=STRAVA_API__SUBSCRIPTION_ID:latest"
