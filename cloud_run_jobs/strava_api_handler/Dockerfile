@@ -10,5 +10,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 
-# Run the strava_webhook_handler function using the functions framework
-CMD ["functions-framework", "--target", "strava_webhook_handler"]
+CMD ["python", "main.py"]
