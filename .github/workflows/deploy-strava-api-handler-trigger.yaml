@@ -40,4 +40,5 @@ jobs:
             --memory=256MB \
             --timeout=60s \
             --project=strava-exploration-v2 \
-            --service-account=strava-api-handler-trigger@strava-exploration-v2.iam.gserviceaccount.com
+            --service-account=strava-api-handler-trigger@strava-exploration-v2.iam.gserviceaccount.com \
+            --trigger-event="google.cloud.pubsub.topic.v1.messagePublished"
