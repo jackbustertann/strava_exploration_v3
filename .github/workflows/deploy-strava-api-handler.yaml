@@ -1,0 +1,56 @@
+name: Deploy Strava API Handler
+
+on:
+  push:
+    branches:
+      - main
+    paths: # Only run if webhook handler code changes
+      - 'cloud_functions/strava_api-handler/**'
+      - '.github/workflows/deploy-strava-api-handler.yaml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: 'strava-exploration-v2'
+
+      - name: 'Configure Docker for Artifact Registry'
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: 'Build and Push Docker Image'
+        shell: bash
+        run: |
+          # Use the commit SHA as the image tag for unique, traceable builds
+          IMAGE_TAG="us-central1-docker.pkg.dev/strava-exploration-v2/strava-api-handler/strava-api-handler:${{ github.sha }}"
+          echo "Building Docker image with tag: $IMAGE_TAG"
+
+          # Build the Docker image from the specified directory and Dockerfile
+          docker build ./cloud_jobs/strava_api_handler \
+            --file ./cloud_jobs/strava_api_handler/Dockerfile \
+            --tag "$IMAGE_TAG"
+          docker push "$IMAGE_TAG"
+
+      - name: 'Deploy Cloud Function'
+        run: |
+          DEPLOY_IMAGE="us-central1-docker.pkg.dev/strava-exploration-v2/strava-api-handler/strava-api-handler:${{ github.sha }}"
+          
+          gcloud run jobs create strava-api-handler \
+            --image "$DEPLOY_IMAGE" \
+            --region us-central1 \
+            --project strava-exploration-v2 \
+            --service-account strava-api-handler@strava-exploration-v2.iam.gserviceaccount.com \

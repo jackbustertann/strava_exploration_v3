@@ -1,6 +1,0 @@
-[requires]
-python_version = "3.11"
-
-[packages]
-google-cloud-pubsub = "*"
-cloudevents = "*"
