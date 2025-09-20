@@ -1,0 +1,43 @@
+name: Deploy Strava API Handler Trigger
+
+on:
+  push:
+    branches:
+      - main
+    paths: # Only run if webhook handler code changes
+      - 'cloud_functions/strava_api_handler_trigger/**'
+      - '.github/workflows/deploy-strava-api-handler-trigger.yaml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: 'strava-exploration-v2'
+
+      - name: 'Deploy Cloud Function'
+        run: |
+          gcloud functions deploy strava-api-handler-trigger \
+            --gen2 \
+            --runtime=python311 \
+            --region=us-central1 \
+            --source=./cloud_functions/strava_api_handler_trigger/ \
+            --entry-point=trigger_strava_job \
+            --memory=256MB \
+            --timeout=60s \
+            --project=strava-exploration-v2 \
+            --service-account=strava-api-handler-trigger@strava-exploration-v2.iam.gserviceaccount.com
