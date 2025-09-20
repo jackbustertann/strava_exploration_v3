@@ -46,9 +46,9 @@ jobs:
 
           # Create Eventarc trigger
           gcloud eventarc triggers create strava-api-handler-trigger \
-            --location=us-central1 \
-            --destination-cloud-function=strava-api-handler-trigger \
-            --destination-cloud-function-location=us-central1 \
+            --destination-run-service=strava-api-handler-trigger \
+            --destination-run-region=us-central1 \
             --event-filters="type=google.cloud.pubsub.topic.v1.messagePublished" \
             --transport-topic=projects/strava-exploration-v2/topics/strava-webhook-events \
-            --service-account=strava-api-handler-trigger@strava-exploration-v2.iam.gserviceaccount.com
+            --service-account=strava-api-handler-trigger@strava-exploration-v2.iam.gserviceaccount.com \
+            --location=us-central1
